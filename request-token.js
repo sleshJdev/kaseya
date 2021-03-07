@@ -1,19 +1,19 @@
-import { createHash } from 'crypto';
-import get from './get'
+const crypto = require('crypto');
+const get = require('./get');
 
 const sha256 = (message) => {
-    return createHash('sha256')
+    return crypto.createHash('sha256')
         .update(message).digest('hex');
 };
 
 const sha1 = (message) => {
-    return createHash('sha1')
+    return crypto.createHash('sha1')
         .update(message).digest('hex');
 };
 
 const generateClaim = () => {
-    const username = process.env.USER_NAME
-    const password = process.env.PASSWORD
+    const username = process.env.USER_NAME;
+    const password = process.env.PASSWORD;
     const random = Math.random().toString().substr(2);
     const rawSHA256Hash = sha256(password);
     const coveredSHA256HashTemp = sha256(password + username);
@@ -29,9 +29,9 @@ const generateClaim = () => {
         + ',rpass1=' + rawSHA1Hash
         + ',rand2=' + random
     ).toString('base64');
-}
+};
 
-export default async () => {
+module.exports = async () => {
     return get('/auth', {
         Authorization: `Basic ${generateClaim()}`
     })

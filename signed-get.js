@@ -1,9 +1,9 @@
-import get from './get'
-import requestToken from './request-token'
+const get = require('./get');
+const requestToken = require('./request-token');
 
-let effectiveAuthInfo = null
+let effectiveAuthInfo = null;
 
-export default async (path, headers) => {
+module.exports = async (path, headers) => {
     const request = (retried, effectiveHeaders) => (
         get(path, effectiveHeaders).then(res => {
             if (!effectiveAuthInfo || (res.ResponseCode === 401 && !retried)) {
@@ -12,19 +12,18 @@ export default async (path, headers) => {
                     return request(true, {
                         ...effectiveHeaders,
                         Authorization: `Bearer ${effectiveAuthInfo.Result.ApiToken}`
-                    })
-                })
+                    });
+                });
             }
-            return res
+            return res;
         })
-    )
-    if (effectiveAuthInfo) {
-        const res_1 = await request(false, {
+    );
+
+    return effectiveAuthInfo
+        ? await request(false, {
             ...headers,
             Authorization: `Bearer ${effectiveAuthInfo.Result.ApiToken}`
-        });
-        return res_1.Result;
-    }
-    const { Result } = await request(false, headers);
-    return (Result);
-}
+        }).then(({ Result }) => (Result))
+        : await request(false, headers)
+            .then(({ Result }) => (Result))
+};

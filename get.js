@@ -1,10 +1,12 @@
+const https = require('https');
+
 const kaseyaHost = process.env.KASEYA_HOST
 
 if (!kaseyaHost) {
     throw new Error('KASEYA_HOST env variable should be specified')
 }
 
-export default (path, headers) => {
+module.exports = async (path, headers) => {
     return new Promise((resolve, reject) => {
         https.get(`https://${kaseyaHost}/api/v1.0${path}`, {
             headers
