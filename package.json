@@ -1,0 +1,24 @@
+{
+  "name": "kaseya",
+  "version": "1.0.0",
+  "description": "Rest client to Kaseya MSP(https://www.kaseya.com/)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sleshJdev/kaseya.git"
+  },
+  "keywords": [
+    "kaseya",
+    "rest",
+    "client"
+  ],
+  "author": "sleshJdev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sleshJdev/kaseya/issues"
+  },
+  "homepage": "https://github.com/sleshJdev/kaseya#readme"
+}
