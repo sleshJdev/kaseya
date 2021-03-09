@@ -13,5 +13,6 @@ module.exports = {
     fetchServicedesks: () => (get(`/automation/servicedesks`)),
     fetchUser: (userId) => (get(`/system/users/${userId}`)),
     fetchMachineGroups: (orgId) => (get(`/system/orgs/${orgId}/machinegroups`)),
-    fetchOrganizations: () => (get('/system/orgs'))
+    fetchOrganizations: () => (get('/system/orgs')),
+    fetchLogmonitoring: (agentId) => (get(`/assetmgmt/logs/${agentId}/logmonitoring`))
 };
