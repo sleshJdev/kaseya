@@ -19,7 +19,7 @@ module.exports = async (path, headers) => {
         })
     );
 
-    return effectiveAuthInfo
+    return effectiveAuthInfo && effectiveAuthInfo.Result && effectiveAuthInfo.Result.ApiToken
         ? await request(false, {
             ...headers,
             Authorization: `Bearer ${effectiveAuthInfo.Result.ApiToken}`
