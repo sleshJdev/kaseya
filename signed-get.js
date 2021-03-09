@@ -1,17 +1,17 @@
 const get = require('./get');
 const requestToken = require('./request-token');
 
-let effectiveAuthInfo = null;
+let apiToken = null;
 
 module.exports = async (path, headers) => {
     const request = (retried, effectiveHeaders) => (
         get(path, effectiveHeaders).then(res => {
-            if (!effectiveAuthInfo || (res.ResponseCode === 401 && !retried)) {
+            if (!apiToken || (res.ResponseCode === 401 && !retried)) {
                 return requestToken().then(authInfo => {
-                    effectiveAuthInfo = authInfo
+                    apiToken = authInfo.Result.ApiToken
                     return request(true, {
                         ...effectiveHeaders,
-                        Authorization: `Bearer ${effectiveAuthInfo.Result.ApiToken}`
+                        Authorization: `Bearer ${apiToken}`
                     });
                 });
             }
@@ -19,10 +19,10 @@ module.exports = async (path, headers) => {
         })
     );
 
-    return effectiveAuthInfo && effectiveAuthInfo.Result && effectiveAuthInfo.Result.ApiToken
+    return apiToken
         ? await request(false, {
             ...headers,
-            Authorization: `Bearer ${effectiveAuthInfo.Result.ApiToken}`
+            Authorization: `Bearer ${apiToken}`
         }).then(({ Result }) => (Result))
         : await request(false, headers)
             .then(({ Result }) => (Result))
