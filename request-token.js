@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const get = require('./get');
+const config = require('./config');
 
 const sha256 = (message) => {
     return crypto.createHash('sha256')
@@ -12,8 +13,8 @@ const sha1 = (message) => {
 };
 
 const generateClaim = () => {
-    const username = process.env.USER_NAME;
-    const password = process.env.PASSWORD;
+    const username = config.KASEYA_USERNAME;
+    const password = config.KASEYA_PASSWORD;
     const random = Math.random().toString().substr(2);
     const rawSHA256Hash = sha256(password);
     const coveredSHA256HashTemp = sha256(password + username);
