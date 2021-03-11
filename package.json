@@ -1,6 +1,6 @@
 {
   "name": "kaseya",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Rest client to Kaseya MSP(https://www.kaseya.com/)",
   "main": "index.js",
   "scripts": {
