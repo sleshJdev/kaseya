@@ -4,6 +4,7 @@ const config = require('./config');
 const authorizeRequest = require('./authorize-request');
 
 http.createServer(async (req, res) => {
+    console.log(`Request ${req.method} ${req.url}, headers: ${req.rawHeaders}`)
     const kaseyaRes = await authorizeRequest({
         method: req.method,
         path: req.url,
