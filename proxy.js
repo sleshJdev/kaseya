@@ -6,7 +6,7 @@ const authorizeRequest = require('./authorize-request');
 
 http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
-    const accept = (url.searchParams['accept'] || 'json').toLocaleLowerCase().trim();
+    const accept = (url.searchParams.get('accept') || 'json').toLocaleLowerCase().trim();
     const reqAttrs = {
         method: req.method,
         path: req.url,
