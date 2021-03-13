@@ -1,12 +1,12 @@
-const requestToken = require('./request-token');
 const config = require('./config');
 const request = require('./request');
+const tryRequestToken = require('./try-request-token');
 
 let apiToken = null;
 
 module.exports = async (unauthReq) => {
-    const authorizedRequest = (retried, headers) => (
-        request({
+    const authorizedRequest = async (retried, headers) => {
+        const res = await request({
             ...unauthReq,
             headers: {
                 ...headers,
@@ -16,19 +16,16 @@ module.exports = async (unauthReq) => {
             protocol: 'https:',
             host: config.KASEYA_HOST,
             hostname: config.KASEYA_HOST,
-        }).then(res => {
-            if (!apiToken || (res.ResponseCode === 401 && !retried)) {
-                return requestToken().then(authInfo => {
-                    apiToken = authInfo.Result.ApiToken
-                    return authorizedRequest(true, {
-                        ...headers,
-                        Authorization: `Bearer ${apiToken}`
-                    });
-                });
-            }
-            return res;
-        })
-    );
+        });
+        if (!apiToken || (res.ResponseCode === 401 && !retried)) {
+            apiToken = await tryRequestToken();
+            return await authorizedRequest(true, {
+                ...headers,
+                Authorization: `Bearer ${apiToken}`
+            });
+        }
+        return Promise.resolve(res);
+    };
 
     return apiToken
         ? await authorizedRequest(false, {
