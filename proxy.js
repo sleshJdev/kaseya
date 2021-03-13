@@ -10,14 +10,30 @@ const overallAgentsDataRouting = {
     '/assetmgmt/patch/history': (agentId) => (`/api/v1.0/assetmgmt/patch/${agentId}/history`)
 }
 
-const handleRequest = async (reqAttrs, res) => {
+const handleRequest = async (reqAttrs, res, resExtProps) => {
     console.log(`Request ${JSON.stringify(reqAttrs)}`);
     const kaseyaRes = await authorizeRequest(reqAttrs);
     if (reqAttrs.accept == 'jsonl') {
         if (Array.isArray(kaseyaRes)) {
-            res.write(kaseyaRes.map(it => JSON.stringify(it)).join('\n'));
+            res.write(kaseyaRes.map(it => {
+                if (!resExtProps) {
+                    return JSON.stringify(it);
+                }
+
+                return JSON.stringify({
+                    ...it,
+                    ...resExtProps
+                });
+            }).join('\n'));
         } else {
-            res.write(JSON.stringify(kaseyaRes));
+            if (!resExtProps) {
+                res.write(JSON.stringify(kaseyaRes));    
+            } else {
+                res.write(JSON.stringify({
+                    ...kaseyaRes,
+                    ...resExtProps
+                }));
+            }
         }
     } else {
         res.write(JSON.stringify(kaseyaRes));
@@ -39,7 +55,7 @@ const handleRequestOverAgents = async (req, res, url, accept) => {
                 headers: req.headers,
                 path: `${agentUrlResolver(AgentId)}${url.search}`,
                 accept,
-            }, res);
+            }, res, { extAgentId: AgentId });
         })
     )
 }
