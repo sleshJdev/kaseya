@@ -72,7 +72,7 @@ http.createServer(async (req, res) => {
     if (overallAgentsDataRouting.hasOwnProperty(url.pathname)) {
         await handleRequestOverAgents(req, res, url, accept);
     } else {
-        await handleRequest(reqAttrs);
+        await handleRequest(reqAttrs, res);
     }
     res.end();
 }).listen(config.PROXY_PORT);
