@@ -55,7 +55,7 @@ const handleRequestOverAgents = async (req, res, url, accept) => {
                 headers: req.headers,
                 path: `${agentUrlResolver(AgentId)}${url.search}`,
                 accept,
-            }, res, { extAgentId: AgentId });
+            }, res, { AgentId });
         })
     )
 }
