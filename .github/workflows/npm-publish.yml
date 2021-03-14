@@ -30,9 +30,9 @@ jobs:
       - run: npm ci
       - run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          token: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: a9e70997-a4c6-4bd3-9ff0-e8912e363c74
+          NPM_TOKEN: a9e70997-a4c6-4bd3-9ff0-e8912e363c74
+          token: a9e70997-a4c6-4bd3-9ff0-e8912e363c74
 
   publish-gpr:
     needs: build
