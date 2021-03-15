@@ -36,5 +36,6 @@ jobs:
       - run: |
           echo "Printin npmrc file content"
           ls -lah
+          ls -lah ~/
           cat ~/.npmrc
       - run: npm publish --access public
