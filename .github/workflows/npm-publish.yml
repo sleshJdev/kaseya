@@ -30,6 +30,6 @@ jobs:
       - run: npm ci
       - run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: 377df2b7-ba2e-407e-8ca9-d52fd3da968b
-          NPM_TOKEN: 377df2b7-ba2e-407e-8ca9-d52fd3da968b
-          token: 377df2b7-ba2e-407e-8ca9-d52fd3da968b
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          token: ${{ secrets.NPM_TOKEN }}
