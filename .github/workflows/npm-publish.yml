@@ -34,8 +34,14 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: |
-          echo "Printin npmrc file content"
-          ls -lah
-          ls -lah ~/
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "always-auth=false" >> ~/.npmrc
+
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > $NPM_CONFIG_USERCONFIG
+          echo "registry=https://registry.npmjs.org/" >> $NPM_CONFIG_USERCONFIG
+          echo "always-auth=false" >> $NPM_CONFIG_USERCONFIG
+
+          cat ~/.npmrc
           cat $NPM_CONFIG_USERCONFIG
       - run: npm publish --access public
