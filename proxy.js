@@ -23,7 +23,7 @@ const handleRequest = async (reqAttrs, res, resExt) => {
 }
 
 const handleRequestOverAgents = async (req, res) => {
-    const { url, attrs } = new URL(req.url, `http://${req.headers.host}`);
+    const { url, attrs } = parseReqInfo(req);
     const agentUrlResolver = overallAgentsDataRouting[url.pathname];
     if (typeof agentUrlResolver !== 'function') {
         res.write(`Unknown URL ${url.pathname}`);
