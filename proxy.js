@@ -2,7 +2,6 @@ const http = require('http');
 const { URL } = require('url');
 const config = require('./config');
 const { fetchAgents } = require('./index');
-
 const authorizeRequest = require('./authorize-request');
 
 const overallAgentsDataRouting = {
@@ -10,37 +9,21 @@ const overallAgentsDataRouting = {
     '/assetmgmt/patch/history': (agentId) => (`/api/v1.0/assetmgmt/patch/${agentId}/history`)
 }
 
-const handleRequest = async (reqAttrs, res, resExtProps) => {
+const handleRequest = async (reqAttrs, res, resExt) => {
     console.log(`Request ${JSON.stringify(reqAttrs)}`);
     const kaseyaRes = await authorizeRequest(reqAttrs);
+    const extend = (it) => ((resExt && { ...it, ...resExt }) || it);
     if (reqAttrs.accept == 'jsonl') {
-        if (Array.isArray(kaseyaRes)) {
-            res.write(kaseyaRes.map(it => {
-                if (!resExtProps) {
-                    return JSON.stringify(it);
-                }
-
-                return JSON.stringify({
-                    ...it,
-                    ...resExtProps
-                });
-            }).join('\n'));
-        } else {
-            if (!resExtProps) {
-                res.write(JSON.stringify(kaseyaRes));    
-            } else {
-                res.write(JSON.stringify({
-                    ...kaseyaRes,
-                    ...resExtProps
-                }));
-            }
-        }
+        res.write([].concat(kaseyaRes).map(it => {
+            return JSON.stringify(extend(it));
+        }).join('\n'));
     } else {
-        res.write(JSON.stringify(kaseyaRes));
+        res.write(JSON.stringify(extend(kaseyaRes)));
     }
 }
 
-const handleRequestOverAgents = async (req, res, url, accept) => {
+const handleRequestOverAgents = async (req, res) => {
+    const { url, attrs } = new URL(req.url, `http://${req.headers.host}`);
     const agentUrlResolver = overallAgentsDataRouting[url.pathname];
     if (typeof agentUrlResolver !== 'function') {
         res.write(`Unknown URL ${url.pathname}`);
@@ -51,28 +34,33 @@ const handleRequestOverAgents = async (req, res, url, accept) => {
     return Promise.all(
         agents.map(async ({ AgentId }) => {
             return await handleRequest({
-                method: req.method,
-                headers: req.headers,
-                path: `${agentUrlResolver(AgentId)}${url.search}`,
-                accept,
+                ...attrs,
+                path: `${agentUrlResolver(AgentId)}${url.search}`
             }, res, { AgentId });
         })
     )
 }
 
-http.createServer(async (req, res) => {
+const parseReqInfo = (req) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
-    const accept = (url.searchParams.get('accept') || 'json').toLocaleLowerCase().trim();
-    const reqAttrs = {
-        method: req.method,
-        path: req.url,
-        headers: req.headers
-    };
+    return {
+        url,
+        accept: (url.searchParams.get('accept') || 'json').toLowerCase().trim(),
+        attrs: {
+            method: req.method,
+            path: req.url,
+            headers: req.headers
+        }
+    }
+}
+
+http.createServer(async (req, res) => {
+    const { url, accept, attrs } = parseReqInfo(req);
     res.setHeader('Content-Type', `application/${accept}; charset=utf-8`);
     if (overallAgentsDataRouting.hasOwnProperty(url.pathname)) {
-        await handleRequestOverAgents(req, res, url, accept);
+        await handleRequestOverAgents(req, res);
     } else {
-        await handleRequest(reqAttrs, res);
+        await handleRequest(attrs, res);
     }
     res.end();
 }).listen(config.PROXY_PORT);
