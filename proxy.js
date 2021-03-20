@@ -9,11 +9,11 @@ const overallAgentsDataRouting = {
     '/assetmgmt/patch/history': (agentId) => (`/api/v1.0/assetmgmt/patch/${agentId}/history`)
 }
 
-const handleRequest = async (reqAttrs, res, resExt) => {
-    console.log(`Request ${JSON.stringify(reqAttrs)}`);
-    const kaseyaRes = await authorizeRequest(reqAttrs);
+const handleRequest = async (reqInfo, res, resExt) => {
+    console.log(`Request ${JSON.stringify(reqInfo)}`);
+    const kaseyaRes = await authorizeRequest(reqInfo.attrs);
     const extend = (it) => ((resExt && { ...it, ...resExt }) || it);
-    if (reqAttrs.accept == 'jsonl') {
+    if (reqInfo.accept == 'jsonl') {
         res.write([].concat(kaseyaRes).map(it => {
             return JSON.stringify(extend(it));
         }).join('\n'));
@@ -23,8 +23,8 @@ const handleRequest = async (reqAttrs, res, resExt) => {
 }
 
 const handleRequestOverAgents = async (req, res) => {
-    const { url, attrs } = parseReqInfo(req);
-    const agentUrlResolver = overallAgentsDataRouting[url.pathname];
+    const reqInfo = parseReqInfo(req);
+    const agentUrlResolver = overallAgentsDataRouting[reqInfo.url.pathname];
     if (typeof agentUrlResolver !== 'function') {
         res.write(`Unknown URL ${url.pathname}`);
         res.statusCode(404);
@@ -34,8 +34,11 @@ const handleRequestOverAgents = async (req, res) => {
     return Promise.all(
         agents.map(async ({ AgentId }) => {
             return await handleRequest({
-                ...attrs,
-                path: `${agentUrlResolver(AgentId)}${url.search}`
+                ...reqInfo,
+                attrs: {
+                    ...reqInfo.attrs,
+                    path: `${agentUrlResolver(AgentId)}${reqInfo.url.search}`
+                }
             }, res, { AgentId });
         })
     )
@@ -55,12 +58,12 @@ const parseReqInfo = (req) => {
 }
 
 http.createServer(async (req, res) => {
-    const { url, accept, attrs } = parseReqInfo(req);
-    res.setHeader('Content-Type', `application/${accept}; charset=utf-8`);
-    if (overallAgentsDataRouting.hasOwnProperty(url.pathname)) {
+    const reqInfo = parseReqInfo(req);
+    res.setHeader('Content-Type', `application/${reqInfo.accept}; charset=utf-8`);
+    if (overallAgentsDataRouting.hasOwnProperty(reqInfo.url.pathname)) {
         await handleRequestOverAgents(req, res);
     } else {
-        await handleRequest(attrs, res);
+        await handleRequest(reqInfo, res);
     }
     res.end();
 }).listen(config.PROXY_PORT);
